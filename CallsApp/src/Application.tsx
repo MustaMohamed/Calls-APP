@@ -1,17 +1,16 @@
 import React, { Component } from 'react';
-import { StyleSheet, View } from 'react-native';
 import Home from './screens/Home';
+import { Provider } from 'react-redux';
+import { store } from './redux-store/store';
 
 class Application extends Component {
   render() {
     return (
-      <View>
+      <Provider store={store}>
         <Home/>
-      </View>
+      </Provider>
     );
   }
 }
-
-const styles = StyleSheet.create({});
 
 export default Application;
