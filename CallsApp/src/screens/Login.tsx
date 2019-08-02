@@ -174,35 +174,3 @@ const styles = StyleSheet.create({
     fontSize: 22
   }
 });
-
-
-/*
-*    <Container style={styles.container}>
-        <View>
-          <Form style={styles.form}>
-            <Item floatingLabel style={styles.formItem}
-                  error={this.state.formError && this.state.userName.hasError}>
-              <Icon active type='FontAwesome' name='user'/>
-              <Label
-                style={[styles.inputText, (this.state.formError && this.state.userName.hasError) ? styles.itemError : {}]}>Username</Label>
-              <Input onChangeText={this.onUsernameChange}/>
-            </Item>
-            <Item floatingLabel
-                  style={[styles.formItem, (this.state.formError && this.state.password.hasError) ? styles.itemError : {}]}
-                  error={this.state.formError && this.state.password.hasError}>
-              <Icon active type='FontAwesome' name='unlock-alt'/>
-
-              <Label
-                style={[styles.inputText, (this.state.formError && this.state.password.hasError) ? styles.itemError : {}]}>Password</Label>
-
-              <Input secureTextEntry={true} onChangeText={this.onPasswordChange}/>
-            </Item>
-          </Form>
-
-          <Button full rounded large style={styles.button} onPress={this.handleUserLogin}>
-            <Text style={styles.buttonText}>Login</Text>
-          </Button>
-        </View>
-
-      </Container>
-* */
