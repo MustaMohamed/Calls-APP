@@ -1,0 +1,5 @@
+export const authActionsConstants = {
+  USER_IS_AUTHENTICATED: 'USER_IS_AUTHENTICATED',
+  USER_LOGIN: 'USER_LOGIN',
+  USER_LOGOUT: 'USER_LOGOUT',
+};

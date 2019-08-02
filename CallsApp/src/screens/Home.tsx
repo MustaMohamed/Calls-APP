@@ -10,7 +10,7 @@ interface HomeScreenProps {
   hideUiLoader?: typeof hideUiLoader;
 }
 
-class Home extends Component<HomeScreenProps> {
+class HomeScreen extends Component<HomeScreenProps> {
   componentDidMount(): void {
     this.props.showUiLoader && this.props.showUiLoader();
   }
@@ -28,4 +28,4 @@ const mapStateToProps = (state: ApplicationState) => {
   return app;
 };
 
-export default connect(mapStateToProps, { showUiLoader, hideUiLoader })(Home);
+export default connect(mapStateToProps, { showUiLoader, hideUiLoader })(HomeScreen);

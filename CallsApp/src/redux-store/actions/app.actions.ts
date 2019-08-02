@@ -1,4 +1,4 @@
-import { appActionsConstants } from '../../constants/redux-store';
+import { appActionsConstants } from '../../constants';
 
 export const showUiLoader = () => {
   return {
