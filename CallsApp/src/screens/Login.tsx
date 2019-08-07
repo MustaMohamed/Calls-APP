@@ -1,18 +1,20 @@
 import React, { Component } from 'react';
-import { Container, Button, Text, View, Form, Item, Icon, Label, Input, Content } from 'native-base';
+import { Container, Button, Text, Form, Item, Label, Input, Content } from 'native-base';
 import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-navigation';
+import { Alert } from 'react-native';
 import { connect } from 'react-redux';
 import { ApplicationState } from '../redux-store/store';
 import { AuthState, ValidationField } from '../types';
-import { checkAuthentication, login } from '../redux-store/actions';
-import { validationConstants } from '../constants';
-import { validateInput } from '../services';
+import {  login, showUiLoader, hideUiLoader } from '../redux-store/actions';
+import { colorConstants, validationConstants } from '../constants';
+import {  validateInput } from '../services';
 import { StyleSheet } from 'react-native';
 
 interface Props extends AuthState {
   navigation: NavigationScreenProp<NavigationState, NavigationParams>;
   login: typeof login;
-  checkAuthentication?: typeof checkAuthentication;
+  showUiLoader?: typeof showUiLoader;
+  hideUiLoader?: typeof hideUiLoader;
 }
 
 interface State {
@@ -48,17 +50,15 @@ class LoginScreen extends Component<Props, State> {
     };
   }
 
-
-  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<{}>, snapshot?: any): void {
+  async componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<{}>, snapshot?: any): void {
     if (this.props.isAuthenticated) {
+      this.props.hideUiLoader();
       this.props.navigation.navigate('Home');
     }
   }
 
   componentDidMount(): void {
-    if (this.props.isAuthenticated) {
-      // this.props.navigation.navigate('Home');
-    }
+
   }
 
   onUsernameChange = (text: string) => {
@@ -72,6 +72,7 @@ class LoginScreen extends Component<Props, State> {
   };
 
   handleUserLogin = () => {
+    this.props.showUiLoader();
     const { userName, password } = this.state;
     let user = {
       userName: userName.value,
@@ -81,6 +82,9 @@ class LoginScreen extends Component<Props, State> {
     if (this._formValidation()) {
       this.setState({ requestTime: (new Date).getTime() });
       this.login(user);
+    } else {
+      this.props.hideUiLoader();
+      Alert.alert('Error', 'Please enter correct username and password!');
     }
   };
 
@@ -98,31 +102,44 @@ class LoginScreen extends Component<Props, State> {
   };
 
   login = (user: {}) => {
+    // this.props.showUiLoader();
     this.props.login(user);
   };
+
+  componentWillUnmount(): void {
+  }
 
   render() {
     return (
       <Container>
         <Content padder contentContainerStyle={styles.container}>
           <Form style={styles.form}>
+            {this.state.formError && <Text style={[styles.textError, styles.textCenter]}>
+                Please enter correct username and password
+            </Text>}
             <Item floatingLabel
-                  style={[styles.formItem, (this.state.formError && this.state.userName.hasError) ? styles.itemError : {}]}
+                  style={[styles.formItem,
+                    (this.state.formError && this.state.userName.hasError) ?
+                      { ...(styles.itemError), ...(styles.textError) } : null]}
                   error={this.state.formError && this.state.userName.hasError}>
               <Label
-                style={[styles.inputText, (this.state.formError && this.state.userName.hasError) ? styles.itemError : null]}>
+                style={[styles.inputText,
+                  (this.state.formError && this.state.userName.hasError) ?
+                    { ...(styles.itemError), ...(styles.textError) } : null]}>
                 Username
               </Label>
               <Input onChangeText={this.onUsernameChange}/>
-
             </Item>
             <Item floatingLabel
-                  style={[styles.formItem, (this.state.formError && this.state.password.hasError) ? styles.itemError : {}]}
+                  style={[styles.formItem,
+                    (this.state.formError && this.state.password.hasError) ?
+                      { ...(styles.itemError), ...(styles.textError) } : null]}
                   error={this.state.formError && this.state.password.hasError}>
-
               <Label
-                style={[styles.inputText, (this.state.formError && this.state.password.hasError) ? styles.itemError : {}]}>Password</Label>
-
+                style={[styles.inputText,
+                  (this.state.formError && this.state.password.hasError) ?
+                    { ...(styles.itemError), ...(styles.textError) } : null]}>
+                Password</Label>
               <Input secureTextEntry={true} onChangeText={this.onPasswordChange}/>
             </Item>
             <Button full rounded large style={styles.button} onPress={this.handleUserLogin}>
@@ -139,11 +156,11 @@ const mapStateToProps = (state: ApplicationState) => {
   const { auth } = state;
   return auth;
 };
-export default connect(mapStateToProps, { checkAuthentication: checkAuthentication, login })(LoginScreen);
+export default connect(mapStateToProps, { login, showUiLoader, hideUiLoader })(LoginScreen);
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#ecf0f1',
+    backgroundColor: colorConstants.WHITE_SECONDARY,
     flexDirection: 'column',
     flex: 1,
     justifyContent: 'center',
@@ -151,25 +168,30 @@ const styles = StyleSheet.create({
   form: {},
   formItem: {
     marginVertical: 20,
-    borderColor: '#2c3e50',
+    borderColor: colorConstants.BACKGROUND_SECONDARY,
     marginLeft: 0,
   },
   itemError: {
-    borderColor: '#e74c3c',
-    color: '#e74c3c'
+    borderColor: colorConstants.TEXT_DANGER,
+  },
+  textError: {
+    color: colorConstants.TEXT_DANGER
+  },
+  textCenter: {
+    textAlign: 'center'
   },
   inputText: {
-    color: '#34495e',
+    color: colorConstants.BACKGROUND_PRIMARY,
     paddingLeft: 5,
     paddingTop: 0
   },
   input: {},
   button: {
     marginTop: 50,
-    backgroundColor: '#2c3e50',
+    backgroundColor: colorConstants.BACKGROUND_SECONDARY,
   },
   buttonText: {
-    color: '#ecf0f1',
+    color: colorConstants.WHITE_SECONDARY,
     fontWeight: 'bold',
     fontSize: 22
   }

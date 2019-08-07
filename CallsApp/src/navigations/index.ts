@@ -1,5 +1,5 @@
-import AppNavigator from './AppNavigator';
+import AppContainer from './AppContainer';
 
 export {
-  AppNavigator
+  AppContainer
 }

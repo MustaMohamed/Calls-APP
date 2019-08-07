@@ -1,15 +1,15 @@
 import { appActionsConstants } from '../../constants';
+import { ThunkAction } from 'redux-thunk';
+import { ApplicationState } from '../store';
 
-export const showUiLoader = () => {
-  return {
+export const showUiLoader = (): ThunkAction<void, ApplicationState, null> => {
+  return async dispatch => dispatch({
     type: appActionsConstants.SHOW_APP_LOADER,
-    payload: true
-  };
+  });
 };
 
-export const hideUiLoader = () => {
-  return {
+export const hideUiLoader = (): ThunkAction<void, ApplicationState, null> => {
+  return dispatch => dispatch({
     type: appActionsConstants.HIDE_APP_LOADER,
-    payload: false
-  };
+  });
 };

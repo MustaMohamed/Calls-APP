@@ -1,4 +1,4 @@
-import {  AuthState, AuthActions } from '../../types/redux-store';
+import { AuthState, AuthActions } from '../../types/redux-store';
 import { authActionsConstants } from '../../constants/redux-store/actions';
 
 const initialState: AuthState = {
@@ -9,7 +9,7 @@ const initialState: AuthState = {
 export const authReducer = (state = initialState, action: AuthActions): AuthState => {
   switch (action.type) {
     case authActionsConstants.USER_IS_AUTHENTICATED:
-      return { ...state, isAuthenticated: action.payload.isAuthenticated };
+      return { ...state, isAuthenticated: action.payload.isAuthenticated, user: action.payload.user };
     case authActionsConstants.USER_LOGIN:
       return { ...state, isAuthenticated: action.payload.isAuthenticated, user: action.payload.user };
     case authActionsConstants.USER_LOGOUT:
