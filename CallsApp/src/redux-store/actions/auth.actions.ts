@@ -1,4 +1,4 @@
-import { authActionsConstants } from '../../constants';
+import { appActionsConstants, authActionsConstants } from '../../constants';
 import {
   userLogin,
   checkAuthentication as checkAuthenticationService,
@@ -7,8 +7,10 @@ import {
   getAuthentication,
   userLogout
 } from '../../services';
+import { ThunkAction } from 'redux-thunk';
+import { ApplicationState } from '../store';
 
-export const checkAuthentication = () => {
+export const checkAuthentication = (): ThunkAction<void, ApplicationState, null> => {
   return async dispatch => {
     const isAuthenticated = await checkAuthenticationService();
     let authUser = null;
@@ -23,7 +25,7 @@ export const checkAuthentication = () => {
   };
 };
 
-export const logout = () => {
+export const logout = (): ThunkAction<void, ApplicationState, null> => {
   return async dispatch => {
     await userLogout();
     dispatch({
@@ -33,15 +35,19 @@ export const logout = () => {
   };
 };
 
-export const login = (user: {} = {}) => {
+export const login = (user: {} = {}): ThunkAction<void, ApplicationState, null> => {
   return async dispatch => {
-    const { results } = await userLogin(user);
-    const authUser = results[0];
-    const isAuthenticated = !isEmpty(authUser);
-    await saveAuthentication(authUser);
-    dispatch({
-      type: authActionsConstants.USER_LOGIN,
-      payload: { isAuthenticated, user: authUser }
-    });
+    try {
+      const { results } = await userLogin(user);
+      const authUser = results[0];
+      const isAuthenticated = !isEmpty(authUser);
+      await saveAuthentication(authUser);
+      dispatch({
+        type: authActionsConstants.USER_LOGIN,
+        payload: { isAuthenticated, user: authUser }
+      });
+    } catch (e) {
+      dispatch({ type: appActionsConstants.HIDE_APP_LOADER });
+    }
   }
 };

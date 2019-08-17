@@ -5,6 +5,7 @@ import { hideUiLoader, showUiLoader, logout } from '../redux-store/actions';
 import { ApplicationState } from '../redux-store/store';
 import { Button, Container, Content, Header, Title, Body } from 'native-base';
 import { colorConstants } from '../constants';
+import requireAuth from '../utils/require-auth.hoc';
 
 interface Props {
   showUiLoader?: typeof showUiLoader;
@@ -25,14 +26,6 @@ class HomeScreen extends Component<Props, State> {
       isBreakActive: true,
       isShiftActive: false,
     };
-  }
-
-  componentDidMount(): void {
-
-  }
-
-  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
-
   }
 
   toggleShiftBreak = () => {
@@ -70,7 +63,7 @@ const mapStateToProps = (state: ApplicationState) => {
   return app;
 };
 
-export default connect(mapStateToProps, { showUiLoader, hideUiLoader, logout })(HomeScreen);
+export default connect(mapStateToProps, { showUiLoader, hideUiLoader, logout })(requireAuth(HomeScreen));
 
 const styles = StyleSheet.create({
   header: {

@@ -8,9 +8,11 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import { ApplicationState } from './redux-store/store';
 import { StyleSheet } from 'react-native';
 import { colorConstants } from './constants';
+import { hideUiLoader } from './redux-store/actions';
 
 interface Props {
   uiLoaderIsActive: boolean;
+  hideUiLoader: typeof hideUiLoader
 }
 
 interface State {
@@ -27,19 +29,18 @@ class Startup extends Component<Props, State> {
   }
 
   componentDidMount(): void {
-    console.log(this.state);
     this.setState({ spinnerActive: this.props.uiLoaderIsActive });
   }
 
   componentWillUnmount(): void {
     this.tm.map(tmNumber => clearTimeout(tmNumber));
+    this.props.hideUiLoader();
+    // this.setState({ spinnerActive: false });
   }
 
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
-    console.log('staaat => ', this.state, 'props => ', this.props);
     if (this.props.uiLoaderIsActive !== this.state.spinnerActive) {
-      console.log('asfafa');
-      this.tm.push(setTimeout(() => this.setState(state => ({ spinnerActive: !state.spinnerActive })), 100));
+      this.tm.push(setTimeout(() => this.setState(state => ({ spinnerActive: !state.spinnerActive })), 50));
     }
   }
 
@@ -59,13 +60,12 @@ class Startup extends Component<Props, State> {
   }
 }
 
-
 const mapStateToProps = (state: ApplicationState) => {
   const { app } = state;
   return app;
 };
 
-export default connect(mapStateToProps)(Startup);
+export default connect(mapStateToProps, { hideUiLoader })(Startup);
 
 const styles = StyleSheet.create({
   spinnerTextStyle: {

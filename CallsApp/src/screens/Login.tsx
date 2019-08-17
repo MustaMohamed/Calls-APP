@@ -102,7 +102,6 @@ class LoginScreen extends Component<Props, State> {
   };
 
   login = (user: {}) => {
-    // this.props.showUiLoader();
     this.props.login(user);
   };
 
