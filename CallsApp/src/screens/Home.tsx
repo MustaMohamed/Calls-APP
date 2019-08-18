@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { connect } from 'react-redux';
 import { hideUiLoader, showUiLoader, logout } from '../redux-store/actions';
 import { ApplicationState } from '../redux-store/store';
-import { Button, Container, Content, Header, Title, Body } from 'native-base';
+import { Button, Container, Header, Title, Body, Text } from 'native-base';
 import { colorConstants } from '../constants';
 import requireAuth from '../utils/require-auth.hoc';
+import TimerProgressCircle from '../components/generic/TimerProgressCircle';
 
 interface Props {
   showUiLoader?: typeof showUiLoader;
@@ -29,7 +30,6 @@ class HomeScreen extends Component<Props, State> {
   }
 
   toggleShiftBreak = () => {
-    this.props.logout();
     this.setState((prevState: State) => ({ isShiftActive: !prevState.isShiftActive, isBreakActive: !prevState.isBreakActive }))
   };
 
@@ -41,18 +41,23 @@ class HomeScreen extends Component<Props, State> {
             <Title>Home</Title>
           </Body>
         </Header>
-        <Content padder>
-          <Button block style={styles.shiftBtn}
-                  disabled={this.state.isShiftActive && !this.state.isBreakActive}
-                  onPress={this.toggleShiftBreak}>
-            <Text style={styles.textBtn}>Start Shift</Text>
-          </Button>
-          <Button block style={styles.shiftBtn}
-                  disabled={!this.state.isShiftActive && this.state.isBreakActive}
-                  onPress={this.toggleShiftBreak}>
-            <Text style={styles.textBtn}>Start Break</Text>
-          </Button>
-        </Content>
+        <View style={styles.contentContainer}>
+          <View style={styles.timer}>
+            <TimerProgressCircle timerSeconds={20}/>
+          </View>
+          <View style={styles.buttonsContainer}>
+            <Button block style={styles.shiftBtn}
+                    disabled={this.state.isShiftActive && !this.state.isBreakActive}
+                    onPress={this.toggleShiftBreak}>
+              <Text style={styles.textBtn}>Start Shift</Text>
+            </Button>
+            <Button block style={styles.shiftBtn}
+                    disabled={!this.state.isShiftActive && this.state.isBreakActive}
+                    onPress={this.toggleShiftBreak}>
+              <Text style={styles.textBtn}>Start Break</Text>
+            </Button>
+          </View>
+        </View>
       </Container>
     );
   }
@@ -79,5 +84,15 @@ const styles = StyleSheet.create({
   },
   spinnerTextStyle: {
     color: colorConstants.BACKGROUND_PRIMARY
+  },
+  contentContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    padding: 10
+  },
+
+  timer: {
+    alignSelf: 'center'
   }
 });
