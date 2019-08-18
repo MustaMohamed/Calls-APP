@@ -21,6 +21,7 @@ const requireAuth: Function = (AuthComponent: ComponentType) => {
       }
     }
 
+
     UNSAFE_componentWillUpdate(nextProps: RequireAuthProps) {
       if (!nextProps.isAuthenticated) {
         this._handleAuthFailure(nextProps);

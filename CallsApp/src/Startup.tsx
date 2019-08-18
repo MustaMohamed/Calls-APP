@@ -35,7 +35,6 @@ class Startup extends Component<Props, State> {
   componentWillUnmount(): void {
     this.tm.map(tmNumber => clearTimeout(tmNumber));
     this.props.hideUiLoader();
-    // this.setState({ spinnerActive: false });
   }
 
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {

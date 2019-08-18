@@ -3,8 +3,7 @@ import { Provider } from 'react-redux';
 import { persistor, store } from './redux-store/store';
 import Startup from './Startup';
 import { PersistGate } from "redux-persist/integration/react";
-import SplashScreen from './screens/Splash';
-
+import { SplashScreen } from './screens';
 
 class Application extends Component {
   render() {
