@@ -2,13 +2,13 @@ import React, { Component, ComponentType } from 'react';
 import { connect } from 'react-redux';
 import { NavigationParams, NavigationScreenProp, NavigationState } from "react-navigation";
 import { ApplicationState } from '../redux-store/store';
-import { logout } from '../redux-store/actions';
+import { logoutAction } from '../redux-store/actions';
 
 interface RequireAuthProps {
   navigation: NavigationScreenProp<NavigationState, NavigationParams>;
   isAuthenticated?: boolean;
   user?: {};
-  logout: typeof logout;
+  logout: typeof logoutAction;
 }
 
 const requireAuth: Function = (AuthComponent: ComponentType) => {
@@ -43,7 +43,7 @@ const requireAuth: Function = (AuthComponent: ComponentType) => {
     return auth;
   };
 
-  return connect(mapStateToProps, { logout })(Auth);
+  return connect(mapStateToProps, { logout: logoutAction })(Auth);
 };
 
 export default requireAuth;

@@ -9,15 +9,27 @@ import {
 } from '../../services';
 import { ThunkAction } from 'redux-thunk';
 import { ApplicationState } from '../store';
+import { ActionCreator, Dispatch } from 'redux';
+import { AuthActions, AuthState } from '../../types/redux-store';
 
-export const checkAuthentication = (): ThunkAction<void, ApplicationState, null> => {
-  return async dispatch => {
+/*
+* action_name: ActionCreator<ActionsType> = (): [action_return_type: ActionsType] => {}
+*
+* // thunk action
+*
+* action_name: ActionCreator<ThunkAction<return_type, stateType, null, ActionsType>> = (): [action_return_type: ThunkAction<return_type, stateType, null, ActionsType>] => {}
+*
+* */
+
+type AuthThunkAction = ThunkAction<Promise, AuthState, null, AuthActions>;
+
+export const checkAuthenticationAction: ActionCreator<AuthThunkAction> = (): ThunkAction<Promise, ApplicationState, null, AuthActions> => {
+  return async (dispatch: Dispatch) => {
     const isAuthenticated = await checkAuthenticationService();
     let authUser = null;
     if (isAuthenticated) {
       authUser = await getAuthentication();
     }
-    console.log(isAuthenticated, authUser);
     dispatch({
       type: authActionsConstants.USER_IS_AUTHENTICATED,
       payload: { isAuthenticated, user: authUser }
@@ -25,8 +37,8 @@ export const checkAuthentication = (): ThunkAction<void, ApplicationState, null>
   };
 };
 
-export const logout = (): ThunkAction<void, ApplicationState, null> => {
-  return async dispatch => {
+export const logoutAction: ActionCreator<AuthThunkAction> = (): AuthThunkAction => {
+  return async (dispatch: Dispatch) => {
     await userLogout();
     dispatch({
       type: authActionsConstants.USER_LOGOUT,
@@ -35,11 +47,10 @@ export const logout = (): ThunkAction<void, ApplicationState, null> => {
   };
 };
 
-export const login = (user: {} = {}): ThunkAction<void, ApplicationState, null> => {
-  return async dispatch => {
+export const loginAction: ActionCreator<AuthThunkAction> = (user: {} = {}): AuthThunkAction => {
+  return async (dispatch: Dispatch) => {
     try {
-      const { results } = await userLogin(user);
-      const authUser = results[0];
+      const authUser = await userLogin(user);
       const isAuthenticated = !isEmpty(authUser);
       await saveAuthentication(authUser);
       dispatch({

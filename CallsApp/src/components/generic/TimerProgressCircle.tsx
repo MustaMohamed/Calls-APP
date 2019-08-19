@@ -6,17 +6,8 @@ interface Props {
   onCounterFinish?: Function;
   timerSeconds: number;
 }
+
 class TimerProgressCircle extends Component<Props> {
-
-  state = {
-    fill: 0
-  };
-  timer: number;
-
-  componentDidMount(): void {
-    this.timer = setInterval(() => {this.setState(ps => ({ fill: ps.fill + 1 }))}, 100);
-  }
-
   componentWillUnmount() {
     clearInterval(this.timer);
   }

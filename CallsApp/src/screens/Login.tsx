@@ -5,16 +5,16 @@ import { Alert } from 'react-native';
 import { connect } from 'react-redux';
 import { ApplicationState } from '../redux-store/store';
 import { AuthState, ValidationField } from '../types';
-import {  login, showUiLoader, hideUiLoader } from '../redux-store/actions';
+import {  loginAction, showUiLoaderAction, hideUiLoaderAction } from '../redux-store/actions';
 import { colorConstants, validationConstants } from '../constants';
 import {  validateInput } from '../services';
 import { StyleSheet } from 'react-native';
 
 interface Props extends AuthState {
   navigation: NavigationScreenProp<NavigationState, NavigationParams>;
-  login: typeof login;
-  showUiLoader?: typeof showUiLoader;
-  hideUiLoader?: typeof hideUiLoader;
+  login: typeof loginAction;
+  showUiLoader?: typeof showUiLoaderAction;
+  hideUiLoader?: typeof hideUiLoaderAction;
 }
 
 interface State {
@@ -155,7 +155,7 @@ const mapStateToProps = (state: ApplicationState) => {
   const { auth } = state;
   return auth;
 };
-export default connect(mapStateToProps, { login, showUiLoader, hideUiLoader })(LoginScreen);
+export default connect(mapStateToProps, { login: loginAction, showUiLoader: showUiLoaderAction, hideUiLoader: hideUiLoaderAction })(LoginScreen);
 
 const styles = StyleSheet.create({
   container: {

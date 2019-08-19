@@ -3,13 +3,13 @@ import { isEmpty } from './validation.service';
 import { getFromLocalStorageAsync, removeFromLocaleStorageAsync, saveToLocalStorageAsync } from './common.service';
 import { localStorageAuthKeys } from '../constants';
 
-export const userLogin = (user) => {
-  return requestFactory.get('https://randomuser.me/api/');
+export const userLogin: Function = async (user): Promise => {
+  const { results } = await requestFactory.get('https://randomuser.me/api/');
+  return results[0];
 };
 
 export const userLogout = async () => {
   return await removeAuthentication();
-
 };
 
 export const checkAuthentication = async () => {
