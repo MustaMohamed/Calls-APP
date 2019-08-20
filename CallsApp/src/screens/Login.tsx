@@ -4,17 +4,19 @@ import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-n
 import { Alert } from 'react-native';
 import { connect } from 'react-redux';
 import { ApplicationState } from '../redux-store/store';
-import { AuthState, ValidationField } from '../types';
-import {  loginAction, showUiLoaderAction, hideUiLoaderAction } from '../redux-store/actions';
+import { AppState, AuthState, ValidationField } from '../types';
+import { loginAction, showUiLoaderAction, hideUiLoaderAction, startAgentShiftAttendanceAction } from '../redux-store/actions';
 import { colorConstants, validationConstants } from '../constants';
-import {  validateInput } from '../services';
+import { validateInput } from '../services';
 import { StyleSheet } from 'react-native';
 
 interface Props extends AuthState {
   navigation: NavigationScreenProp<NavigationState, NavigationParams>;
   login: typeof loginAction;
-  showUiLoader?: typeof showUiLoaderAction;
-  hideUiLoader?: typeof hideUiLoaderAction;
+  showUiLoader: typeof showUiLoaderAction;
+  hideUiLoader: typeof hideUiLoaderAction;
+  startAgentShiftAttendance: typeof startAgentShiftAttendanceAction;
+  auth: AuthState;
 }
 
 interface State {
@@ -51,14 +53,16 @@ class LoginScreen extends Component<Props, State> {
   }
 
   async componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<{}>, snapshot?: any): void {
-    if (this.props.isAuthenticated) {
+    if (this.props.auth.isAuthenticated) {
+      await this.props.startAgentShiftAttendance();
       this.props.hideUiLoader();
       this.props.navigation.navigate('Home');
     }
   }
 
   componentDidMount(): void {
-
+    // if (this.props.app.uiLoaderIsActive)
+    //   this.props.hideUiLoader();
   }
 
   onUsernameChange = (text: string) => {
@@ -152,10 +156,16 @@ class LoginScreen extends Component<Props, State> {
 }
 
 const mapStateToProps = (state: ApplicationState) => {
-  const { auth } = state;
-  return auth;
+  console.log(state);
+  const { auth, app } = state;
+  return { auth, app };
 };
-export default connect(mapStateToProps, { login: loginAction, showUiLoader: showUiLoaderAction, hideUiLoader: hideUiLoaderAction })(LoginScreen);
+export default connect(mapStateToProps, {
+  login: loginAction,
+  showUiLoader: showUiLoaderAction,
+  hideUiLoader: hideUiLoaderAction,
+  startAgentShiftAttendance: startAgentShiftAttendanceAction
+})(LoginScreen);
 
 const styles = StyleSheet.create({
   container: {

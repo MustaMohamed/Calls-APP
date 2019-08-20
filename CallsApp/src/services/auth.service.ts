@@ -9,6 +9,7 @@ export const userLogin: Function = async (user): Promise => {
 };
 
 export const userLogout = async () => {
+  const { results } = await requestFactory.get('https://randomuser.me/api/');
   return await removeAuthentication();
 };
 

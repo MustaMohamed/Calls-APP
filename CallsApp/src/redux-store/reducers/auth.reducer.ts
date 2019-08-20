@@ -7,9 +7,9 @@ const initialState: AuthState = {
   user: {}
 };
 /*
-* reducer_name: Reducer<StateType> = (state: stateType = initialState, action: ActionType): [reducer_return_type: StateType] => {}
+* reducer_name: Reducer<StateType, ActionType> = (state: stateType = initialState, action: ActionType): [reducer_return_type: StateType] => {}
 * */
-export const authReducer: Reducer<AuthState> = (state: AuthState = initialState, action: AuthActions): AuthState => {
+export const authReducer: Reducer<AuthState, AuthActions> = (state: AuthState = initialState, action: AuthActions): AuthState => {
   switch (action.type) {
     case authActionsConstants.USER_IS_AUTHENTICATED:
       return { ...state, isAuthenticated: action.payload.isAuthenticated, user: action.payload.user };

@@ -18,3 +18,10 @@ export const hideUiLoaderAction: ActionCreator<AppActions> = (): AppActions => {
     payload: false,
   };
 };
+
+export const changeAppIsInBackgroundState: ActionCreator<AppActions> = (appState: boolean): AppActions => {
+  return {
+    type: appActionsConstants.CHANGE_APP_IS_IN_BACKGROUND_STATE,
+    payload: appState,
+  };
+};

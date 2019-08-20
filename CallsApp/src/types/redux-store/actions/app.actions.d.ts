@@ -11,4 +11,9 @@ export interface HideUiLoaderAction extends Action {
   payload: boolean;
 }
 
-export type AppActions = ShowUiLoaderAction | HideUiLoaderAction;
+export interface ChangeAppIsInBackgroundState extends Action {
+  type: typeof appActionsConstants.CHANGE_APP_IS_IN_BACKGROUND_STATE;
+  payload: boolean;
+}
+
+export type AppActions = ShowUiLoaderAction | HideUiLoaderAction | ChangeAppIsInBackgroundState;

@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 
 export default {
 
-  post(endpoint: string, data: {}, headers: {}) {
+  post(endpoint: string, data: {}, headers: {}): Promise<any> {
     return new Promise ((resolve, reject) => {
       axios.post (endpoint, data, headers || {})
         .then ((response) => {
@@ -13,7 +13,7 @@ export default {
         });
     });
   },
-  get(endpoint: string) {
+  get(endpoint: string): Promise<any> {
     return new Promise ((resolve, reject) => {
       axios.get (endpoint)
         .then ((response: any) => {
@@ -24,7 +24,7 @@ export default {
         });
     });
   },
-  all(ajaxCalls: Promise<any>[]) {
+  all(ajaxCalls: Promise<any>[]): Promise<any> {
     return new Promise ((resolve, reject) => {
       axios.all (ajaxCalls)
         .then (axios.spread ((acct, perms) => {

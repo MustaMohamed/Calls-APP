@@ -1,5 +1,6 @@
 export interface AppState {
   uiLoaderIsActive?: boolean;
+  appIsInBackground?: boolean;
 }
 
 export interface AuthState {
@@ -12,7 +13,7 @@ export interface AgentState {
   endBreakTime?: Date;
   startShiftTime?: Date;
   endShiftTime?: Date;
-  agentStatus: AgentStatus;
+  agentStatus?: AgentStatus;
 }
 
 

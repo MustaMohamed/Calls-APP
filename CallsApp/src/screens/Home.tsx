@@ -14,10 +14,11 @@ import { Button, Container, Header, Title, Body, Text, Fab, Icon, Toast } from '
 import { colorConstants } from '../constants';
 import requireAuth from '../utils/require-auth.hoc';
 import TimerProgressCircle from '../components/generic/TimerProgressCircle';
+import { AgentState, AgentStatus, AppState, AuthState } from '../types';
 
 interface Props {
-  showUiLoader?: typeof showUiLoaderAction;
-  hideUiLoader?: typeof hideUiLoaderAction;
+  showUiLoader: typeof showUiLoaderAction;
+  hideUiLoader: typeof hideUiLoaderAction;
   uiLoaderIsActive?: boolean;
   getAgentStatus: typeof getAgentStatusAction;
   startAgentShiftAttendance: typeof startAgentShiftAttendanceAction;
@@ -25,6 +26,8 @@ interface Props {
   startAgentBreak: typeof startAgentBreakAction;
   endAgentBreak: typeof endAgentBreakAction;
   logout: typeof logoutAction;
+  auth: AuthState;
+  agentStatus: AgentStatus;
 }
 
 interface State {
@@ -37,21 +40,31 @@ class HomeScreen extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      isBreakActive: true,
-      isShiftActive: false,
+      isBreakActive: false,
+      isShiftActive: true,
       isFabActionsActive: false,
     };
   }
 
-  startBreak = () => {
+  componentDidMount(): void {
+    const { agentStatus } = this.props;
+    this.setState({
+      isBreakActive: agentStatus.isInActiveBreak,
+      isShiftActive: agentStatus.isInActiveShift
+    });
+
+    console.log('Home did mount !');
+  }
+
+  startBreak = async () => {
     if (!this.state.isBreakActive && this.state.isShiftActive) {
       this.setState((prevState: State) => ({
-        isShiftActive: !prevState.isShiftActive,
-        isBreakActive: !prevState.isBreakActive
+        isShiftActive: false,
+        isBreakActive: true
       }), async () => {
         this.toggleFabButton();
         this.props.showUiLoader();
-        await this.props.startAgentBreak(this.props.user);
+        await this.props.startAgentBreak(this.props.auth.user);
         this.props.hideUiLoader();
         Toast.show({
           text: 'Your break has been started!',
@@ -61,15 +74,15 @@ class HomeScreen extends Component<Props, State> {
     }
   };
 
-  startShift = () => {
+  startShift = async () => {
     if (this.state.isBreakActive && !this.state.isShiftActive) {
       this.setState((prevState: State) => ({
-        isShiftActive: !prevState.isShiftActive,
-        isBreakActive: !prevState.isBreakActive
+        isShiftActive: true,
+        isBreakActive: false
       }), async () => {
         this.toggleFabButton();
         this.props.showUiLoader();
-        await this.props.endAgentBreak(this.props.user);
+        await this.props.endAgentBreak(this.props.auth.user);
         this.props.hideUiLoader();
         Toast.show({
           text: 'Your shift has been started!',
@@ -99,20 +112,8 @@ class HomeScreen extends Component<Props, State> {
         </Header>
         <View style={styles.contentContainer}>
           <View style={styles.timer}>
-            <TimerProgressCircle timerSeconds={10}/>
+            <TimerProgressCircle timerSeconds={this.state.isShiftActive ? 10 : 1}/>
           </View>
-          {/* <View style={styles.buttonsContainer}>
-            <Button block style={styles.shiftBtn}
-                    disabled={this.state.isShiftActive && !this.state.isBreakActive}
-                    onPress={this.startShift}>
-              <Text style={styles.textBtn}>Start Shift</Text>
-            </Button>
-            <Button block style={styles.shiftBtn}
-                    disabled={!this.state.isShiftActive && this.state.isBreakActive}
-                    onPress={this.startBreak}>
-              <Text style={styles.textBtn}>Start Break</Text>
-            </Button>
-          </View>*/}
         </View>
         <Fab active={this.state.isFabActionsActive}
              direction='up'
@@ -125,12 +126,12 @@ class HomeScreen extends Component<Props, State> {
                   onPress={this.logout}>
             <Icon name={'log-out'} type={'Entypo'}/>
           </Button>
-          <Button style={styles.startBreakBtn}
+          <Button style={(!this.state.isShiftActive && this.state.isBreakActive) ? styles.startBreakBtnDisabled : styles.startBreakBtn}
                   disabled={!this.state.isShiftActive && this.state.isBreakActive}
                   onPress={this.startBreak}>
             <Icon name={'free-breakfast'} type={'MaterialIcons'}/>
           </Button>
-          <Button style={styles.startShiftBtn}
+          <Button style={(this.state.isShiftActive && !this.state.isBreakActive) ? styles.startShiftBtnDisabled : styles.startShiftBtn}
                   disabled={this.state.isShiftActive && !this.state.isBreakActive}
                   onPress={this.startShift}>
             <Icon name={'playcircleo'} type={'AntDesign'}/>
@@ -142,9 +143,9 @@ class HomeScreen extends Component<Props, State> {
 }
 
 const mapStateToProps = (state: ApplicationState) => {
-  console.log(state);
-  const { app } = state;
-  return app;
+  const { auth, agent } = state;
+  const { agentStatus } = agent;
+  return { auth, agentStatus };
 };
 
 export default connect(mapStateToProps, {
@@ -189,9 +190,15 @@ const styles = StyleSheet.create({
     backgroundColor: colorConstants.TEXT_DANGER
   },
   startBreakBtn: {
-    backgroundColor: '#45aaf2',
+    backgroundColor: '#1e90ff',
+  },
+  startBreakBtnDisabled: {
+    backgroundColor: '#82ccdd',
   },
   startShiftBtn: {
-    backgroundColor: '#0be881',
+    backgroundColor: '#2ed573',
+  },
+  startShiftBtnDisabled: {
+    backgroundColor: '#7bed9f',
   }
 });

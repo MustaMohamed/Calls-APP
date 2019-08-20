@@ -8,10 +8,9 @@ import {
   userLogout
 } from '../../services';
 import { ThunkAction } from 'redux-thunk';
-import { ApplicationState } from '../store';
 import { ActionCreator, Dispatch } from 'redux';
 import { AuthActions, AuthState } from '../../types/redux-store';
-
+import { endAgentShiftAction, getAgentStatusAction } from './agent.actions';
 /*
 * action_name: ActionCreator<ActionsType> = (): [action_return_type: ActionsType] => {}
 *
@@ -21,9 +20,9 @@ import { AuthActions, AuthState } from '../../types/redux-store';
 *
 * */
 
-type AuthThunkAction = ThunkAction<Promise, AuthState, null, AuthActions>;
+type AuthThunkAction = ThunkAction<Promise<any>, AuthState, null, AuthActions>;
 
-export const checkAuthenticationAction: ActionCreator<AuthThunkAction> = (): ThunkAction<Promise, ApplicationState, null, AuthActions> => {
+export const checkAuthenticationAction: ActionCreator<AuthThunkAction> = (): AuthThunkAction => {
   return async (dispatch: Dispatch) => {
     const isAuthenticated = await checkAuthenticationService();
     let authUser = null;
@@ -40,6 +39,7 @@ export const checkAuthenticationAction: ActionCreator<AuthThunkAction> = (): Thu
 export const logoutAction: ActionCreator<AuthThunkAction> = (): AuthThunkAction => {
   return async (dispatch: Dispatch) => {
     await userLogout();
+    await dispatch(endAgentShiftAction());
     dispatch({
       type: authActionsConstants.USER_LOGOUT,
       payload: { isAuthenticated: false, user: null }
