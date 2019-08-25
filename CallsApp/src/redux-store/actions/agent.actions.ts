@@ -1,7 +1,7 @@
-import { agentActionsConstants } from '../../constants';
+import { agentActionsConstants, appActionsConstants } from '../../constants';
 import { ActionCreator, Dispatch } from 'redux';
 import { ThunkAction } from 'redux-thunk';
-import { AgentState, AgentActions } from '../../types/redux-store';
+import { AgentState, AgentActions, AuthUser, AgentStatus, BreakInfo } from '../../types';
 import {
   getAgentLastActionTimeFromLocalStorage,
   getAgentStatus,
@@ -15,78 +15,90 @@ import {
 
 type AgentThunkAction = ThunkAction<Promise<any>, AgentState, null, AgentActions>;
 
-export const startAgentBreakAction: ActionCreator<AgentThunkAction> = (user: any): AgentThunkAction => {
+export const startAgentBreakAction: ActionCreator<AgentThunkAction> = (user: AuthUser): AgentThunkAction => {
   return async (dispatch: Dispatch) => {
-    const result = await sendAgentStartBreak(user);
-    await dispatch(updateAgentStatusLastActionAction());
-    dispatch({
-      type: agentActionsConstants.START_BREAK,
-      payload: new Date((new Date()).toLocaleString())
-    });
+    try {
+      const breakInfo: BreakInfo = await sendAgentStartBreak(user);
+      await dispatch(updateAgentStatusLastActionAction(new Date()));
+      dispatch({
+        type: agentActionsConstants.START_BREAK,
+        payload: breakInfo
+      });
+    } catch (e) {
+
+      dispatch({ type: appActionsConstants.HIDE_APP_LOADER });
+    }
   };
 };
 
-export const endAgentBreakAction: ActionCreator<AgentThunkAction> = (user: any): AgentThunkAction => {
+export const endAgentBreakAction: ActionCreator<AgentThunkAction> = (user: AuthUser, lastBreakId: number): AgentThunkAction => {
   return async (dispatch: Dispatch) => {
-    const result = await sendAgentEndBreak(user);
-    await dispatch(updateAgentStatusLastActionAction());
+
+    const breakInfo: BreakInfo = await sendAgentEndBreak(user, lastBreakId);
+    await dispatch(updateAgentStatusLastActionAction(new Date()));
     dispatch({
       type: agentActionsConstants.END_BREAK,
-      payload: new Date((new Date()).toLocaleString())
+      payload: breakInfo
     });
   };
 };
 
-export const startAgentShiftAttendanceAction: ActionCreator<AgentThunkAction> = (user: any): AgentThunkAction => {
-  return async (dispatch) => {
-    const result = await sendAgentStartShiftAttendance(user);
-    // await dispatch(getAgentStatusAction());
-    await dispatch(updateAgentStatusLastActionAction());
-    dispatch({
-      type: agentActionsConstants.START_SHIFT_ATTENDANCE,
-      payload: new Date((new Date()).toLocaleString())
-    });
-  };
-};
-
-export const endAgentShiftAction: ActionCreator<AgentThunkAction> = (user: any): AgentThunkAction => {
+export const startAgentShiftAttendanceAction: ActionCreator<AgentThunkAction> = (user: AuthUser): AgentThunkAction => {
   return async (dispatch: Dispatch) => {
-    const result = await sendAgentEndShift(user);
+    try {
+      const checkinTime = await sendAgentStartShiftAttendance(user);
+      await dispatch(updateAgentStatusLastActionAction(new Date()));
+      dispatch({
+        type: agentActionsConstants.START_SHIFT_ATTENDANCE,
+        payload: checkinTime
+      });
+    } catch (e) {
+
+      dispatch({ type: appActionsConstants.HIDE_APP_LOADER });
+    }
+  };
+};
+
+export const endAgentShiftAction: ActionCreator<AgentThunkAction> = (user: AuthUser): AgentThunkAction => {
+  return async (dispatch: Dispatch) => {
+    // const result = await sendAgentEndShift(user);
     await dispatch(deleteAgentStatusLastActionAction());
     dispatch({
       type: agentActionsConstants.END_SHIFT,
-      payload: new Date((new Date()).toLocaleString())
+      payload: new Date()
     });
   };
 };
 
-export const getAgentStatusAction: ActionCreator<AgentThunkAction> = (user: any): AgentThunkAction => {
+export const getAgentStatusAction: ActionCreator<AgentThunkAction> = (user: AuthUser): AgentThunkAction => {
   return async (dispatch: Function) => {
-    const result = await getAgentStatus(user);
-    const lastAction = await getAgentLastActionTimeFromLocalStorage();
+    let statusResult: AgentStatus;
+    try {
+      statusResult = await getAgentStatus(user);
+    } catch (e) {
+      dispatch({ type: appActionsConstants.HIDE_APP_LOADER });
+    }
+    let lastAction = await getAgentLastActionTimeFromLocalStorage();
+    if (!lastAction)
+      lastAction = new Date();
+    const agentStatus: AgentStatus = {
+      // this code when a real api call
+      ...statusResult,
+      lastAction: new Date(lastAction)
+    };
     dispatch({
       type: agentActionsConstants.GET_AGENT_STATUS,
-      payload: {
-        // this code when a real api call
-        // isInActiveBreak: result.isInActiveBreak,
-        // isInActiveShift: !result.isInActiveBreak,
-        // checkInTime: result.checkinTime,
-        // lastAction: new Date(lastAction)
-        isInActiveBreak: false,
-        isInActiveShift: true,
-        checkInTime: new Date((new Date()).toLocaleString()),
-        lastAction: new Date(lastAction)
-      }
+      payload: agentStatus
     });
   };
 };
 
-export const updateAgentStatusLastActionAction: ActionCreator<AgentThunkAction> = (): AgentThunkAction => {
+export const updateAgentStatusLastActionAction: ActionCreator<AgentThunkAction> = (date: Date): AgentThunkAction => {
   return async (dispatch: Dispatch) => {
-    const lastAction = await saveAgentLastActionTimeToLocalStorage((new Date()).toLocaleString());
+    await saveAgentLastActionTimeToLocalStorage(date);
     dispatch({
       type: agentActionsConstants.UPDATE_AGENT_LAST_ACTION,
-      payload: new Date(lastAction)
+      payload: date
     });
   };
 };

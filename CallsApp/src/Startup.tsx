@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { AppContainer } from './navigations';
 import { Root, StyleProvider } from 'native-base';
 import theme from '../native-base-theme/variables/material';
@@ -20,7 +20,7 @@ interface State {
   spinnerActive: boolean;
 }
 
-class Startup extends Component<Props, State> {
+class Startup extends PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -53,6 +53,8 @@ class Startup extends Component<Props, State> {
     const appIsInBackgroundState = !(this.state.appState.match(/inactive|background/) && nextAppState === 'active');
     this.setState({ appState: nextAppState });
     this.props.changeAppIsInBackgroundState(appIsInBackgroundState);
+    if (appIsInBackgroundState)
+      this.props.hideUiLoader();
   };
 
 
@@ -73,7 +75,6 @@ class Startup extends Component<Props, State> {
 }
 
 const mapStateToProps = (state: ApplicationState) => {
-  console.log(state);
   const { app } = state;
   return app;
 };

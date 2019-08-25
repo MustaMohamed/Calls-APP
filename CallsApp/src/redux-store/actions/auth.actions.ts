@@ -1,15 +1,8 @@
 import { appActionsConstants, authActionsConstants } from '../../constants';
-import {
-  userLogin,
-  checkAuthentication as checkAuthenticationService,
-  isEmpty,
-  saveAuthentication,
-  getAuthentication,
-  userLogout
-} from '../../services';
+import { userLogin, isEmpty, userLogout } from '../../services';
 import { ThunkAction } from 'redux-thunk';
 import { ActionCreator, Dispatch } from 'redux';
-import { AuthActions, AuthState } from '../../types/redux-store';
+import { AuthActions, AuthState, AuthUser, UserLogin } from '../../types';
 import { endAgentShiftAction, getAgentStatusAction } from './agent.actions';
 /*
 * action_name: ActionCreator<ActionsType> = (): [action_return_type: ActionsType] => {}
@@ -24,10 +17,10 @@ type AuthThunkAction = ThunkAction<Promise<any>, AuthState, null, AuthActions>;
 
 export const checkAuthenticationAction: ActionCreator<AuthThunkAction> = (): AuthThunkAction => {
   return async (dispatch: Dispatch) => {
-    const isAuthenticated = await checkAuthenticationService();
+    const isAuthenticated = true;
     let authUser = null;
     if (isAuthenticated) {
-      authUser = await getAuthentication();
+      authUser = {};
     }
     dispatch({
       type: authActionsConstants.USER_IS_AUTHENTICATED,
@@ -36,29 +29,41 @@ export const checkAuthenticationAction: ActionCreator<AuthThunkAction> = (): Aut
   };
 };
 
-export const logoutAction: ActionCreator<AuthThunkAction> = (): AuthThunkAction => {
+export const logoutAction: ActionCreator<AuthThunkAction> = (user: AuthUser, isLeaveLogout: boolean): AuthThunkAction => {
   return async (dispatch: Dispatch) => {
-    await userLogout();
-    await dispatch(endAgentShiftAction());
-    dispatch({
-      type: authActionsConstants.USER_LOGOUT,
-      payload: { isAuthenticated: false, user: null }
-    });
+    try {
+
+      if (isLeaveLogout) {
+        await dispatch(endAgentShiftAction(user));
+      }
+      await userLogout(user, isLeaveLogout);
+      dispatch({
+        type: authActionsConstants.USER_LOGOUT,
+        payload: { isAuthenticated: false, user: null }
+      });
+    } catch (e) {
+
+    }
   };
 };
 
-export const loginAction: ActionCreator<AuthThunkAction> = (user: {} = {}): AuthThunkAction => {
+export const loginAction: ActionCreator<AuthThunkAction> = (user: UserLogin = {}): AuthThunkAction => {
   return async (dispatch: Dispatch) => {
     try {
       const authUser = await userLogin(user);
       const isAuthenticated = !isEmpty(authUser);
-      await saveAuthentication(authUser);
-      dispatch({
-        type: authActionsConstants.USER_LOGIN,
-        payload: { isAuthenticated, user: authUser }
-      });
+      if (isAuthenticated) {
+        dispatch({
+          type: authActionsConstants.USER_LOGIN,
+          payload: { isAuthenticated, user: authUser }
+        });
+      } else {
+        dispatch({ type: appActionsConstants.HIDE_APP_LOADER });
+      }
     } catch (e) {
+
       dispatch({ type: appActionsConstants.HIDE_APP_LOADER });
+    } finally {
     }
   }
 };

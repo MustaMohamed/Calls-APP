@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "react-native start",
+    "post-start": "rndebugger-open",
     "start-android": "react-native run-android",
     "test": "jest",
     "lint": "eslint ."
@@ -40,6 +41,7 @@
     "eslint": "^6.1.0",
     "jest": "^24.8.0",
     "metro-react-native-babel-preset": "^0.55.0",
+    "react-native-debugger-open": "^0.3.20",
     "react-test-renderer": "16.8.6",
     "typescript": "^3.5.3"
   },

@@ -1,15 +1,16 @@
 import { agentActionsConstants } from '../../../constants';
 import { AgentStatus } from '../states';
 import { Action } from 'redux';
+import { BreakInfo } from '../../agent';
 
 export interface StartBreak extends Action {
   type: typeof agentActionsConstants.START_BREAK;
-  payload: Date;
+  payload: BreakInfo;
 }
 
 export interface EndBreak extends Action {
   type: typeof agentActionsConstants.END_BREAK;
-  payload: Date;
+  payload: BreakInfo;
 }
 
 export interface StartShiftAttendance extends Action {
@@ -28,7 +29,7 @@ export interface GetAgentStatus extends Action {
 }
 
 export interface UpdateAgentLastAction extends Action {
-  type: typeof agentActionsConstants.GET_AGENT_STATUS;
+  type: typeof agentActionsConstants.UPDATE_AGENT_LAST_ACTION;
   payload: Date;
 }
 

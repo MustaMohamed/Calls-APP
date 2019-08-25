@@ -4,8 +4,8 @@ import { NavigationScreenProp, NavigationState, NavigationParams } from 'react-n
 import { Alert } from 'react-native';
 import { connect } from 'react-redux';
 import { ApplicationState } from '../redux-store/store';
-import { AppState, AuthState, ValidationField } from '../types';
-import { loginAction, showUiLoaderAction, hideUiLoaderAction, startAgentShiftAttendanceAction } from '../redux-store/actions';
+import { AgentStatus, AppState, AuthState, UserLogin, ValidationField } from '../types';
+import { loginAction, showUiLoaderAction, hideUiLoaderAction, startAgentShiftAttendanceAction, getAgentStatusAction } from '../redux-store/actions';
 import { colorConstants, validationConstants } from '../constants';
 import { validateInput } from '../services';
 import { StyleSheet } from 'react-native';
@@ -16,11 +16,12 @@ interface Props extends AuthState {
   showUiLoader: typeof showUiLoaderAction;
   hideUiLoader: typeof hideUiLoaderAction;
   startAgentShiftAttendance: typeof startAgentShiftAttendanceAction;
+  getAgentStatus: typeof getAgentStatusAction;
   auth: AuthState;
 }
 
 interface State {
-  userName: ValidationField;
+  username: ValidationField;
   password: ValidationField;
   formError: boolean;
   requestTime: number;
@@ -34,7 +35,7 @@ class LoginScreen extends Component<Props, State> {
     this.state = {
       formError: false,
       requestTime: 0,
-      userName: {
+      username: {
         value: '',
         validationTypes: [
           validationConstants.NOT_EMPTY,
@@ -54,7 +55,8 @@ class LoginScreen extends Component<Props, State> {
 
   async componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<{}>, snapshot?: any): void {
     if (this.props.auth.isAuthenticated) {
-      await this.props.startAgentShiftAttendance();
+      await this.props.startAgentShiftAttendance(this.props.auth.user);
+      // await this.props.getAgentStatus(this.props.auth.user);
       this.props.hideUiLoader();
       this.props.navigation.navigate('Home');
     }
@@ -66,8 +68,8 @@ class LoginScreen extends Component<Props, State> {
   }
 
   onUsernameChange = (text: string) => {
-    const { userName } = this.state;
-    this.setState({ userName: Object.assign({}, userName, { value: text }) });
+    const { username } = this.state;
+    this.setState({ username: Object.assign({}, username, { value: text }) });
   };
 
   onPasswordChange = (text: string) => {
@@ -77,11 +79,10 @@ class LoginScreen extends Component<Props, State> {
 
   handleUserLogin = () => {
     this.props.showUiLoader();
-    const { userName, password } = this.state;
-    let user = {
-      userName: userName.value,
+    const { username, password } = this.state;
+    let user: UserLogin = {
+      username: username.value,
       password: password.value,
-      loginDate: (new Date()).toLocaleString()
     };
     if (this._formValidation()) {
       this.setState({ requestTime: (new Date).getTime() });
@@ -93,7 +94,7 @@ class LoginScreen extends Component<Props, State> {
   };
 
   _formValidation = () => {
-    let itemsToValidateKeys = ['userName', 'password'], validForm = true;
+    let itemsToValidateKeys = ['username', 'password'], validForm = true;
     for (let i = 0; i < itemsToValidateKeys.length; i++) {
       let key = itemsToValidateKeys[i], validKey = true;
       validKey = validateInput(this.state[key].validationTypes, this.state[key].value);
@@ -105,7 +106,7 @@ class LoginScreen extends Component<Props, State> {
     return validForm;
   };
 
-  login = (user: {}) => {
+  login = (user: UserLogin) => {
     this.props.login(user);
   };
 
@@ -122,12 +123,12 @@ class LoginScreen extends Component<Props, State> {
             </Text>}
             <Item floatingLabel
                   style={[styles.formItem,
-                    (this.state.formError && this.state.userName.hasError) ?
+                    (this.state.formError && this.state.username.hasError) ?
                       { ...(styles.itemError), ...(styles.textError) } : null]}
-                  error={this.state.formError && this.state.userName.hasError}>
+                  error={this.state.formError && this.state.username.hasError}>
               <Label
                 style={[styles.inputText,
-                  (this.state.formError && this.state.userName.hasError) ?
+                  (this.state.formError && this.state.username.hasError) ?
                     { ...(styles.itemError), ...(styles.textError) } : null]}>
                 Username
               </Label>
@@ -156,7 +157,6 @@ class LoginScreen extends Component<Props, State> {
 }
 
 const mapStateToProps = (state: ApplicationState) => {
-  console.log(state);
   const { auth, app } = state;
   return { auth, app };
 };
@@ -164,7 +164,8 @@ export default connect(mapStateToProps, {
   login: loginAction,
   showUiLoader: showUiLoaderAction,
   hideUiLoader: hideUiLoaderAction,
-  startAgentShiftAttendance: startAgentShiftAttendanceAction
+  startAgentShiftAttendance: startAgentShiftAttendanceAction,
+  getAgentStatus: getAgentStatusAction
 })(LoginScreen);
 
 const styles = StyleSheet.create({

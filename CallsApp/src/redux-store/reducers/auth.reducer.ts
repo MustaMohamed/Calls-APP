@@ -1,10 +1,11 @@
 import { AuthState, AuthActions } from '../../types/redux-store';
 import { authActionsConstants } from '../../constants/redux-store/actions';
 import { Reducer } from 'redux';
+import { AuthUser } from '../../types';
 
 const initialState: AuthState = {
   isAuthenticated: false,
-  user: {}
+  user: AuthUser
 };
 /*
 * reducer_name: Reducer<StateType, ActionType> = (state: stateType = initialState, action: ActionType): [reducer_return_type: StateType] => {}

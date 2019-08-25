@@ -1,4 +1,4 @@
-import { AgentActions, AgentState, AgentStatus } from '../../types/redux-store';
+import { AgentActions, AgentState, AgentStatus, BreakInfo } from '../../types/redux-store';
 import { agentActionsConstants } from '../../constants/redux-store/actions';
 import { Reducer } from 'redux';
 
@@ -6,63 +6,87 @@ const initialState: AgentState = {
   agentStatus: {
     isInActiveBreak: false,
     isInActiveShift: true,
-    checkInTime: new Date(new Date().toLocaleString()),
+    checkInTime: undefined,
     lastAction: undefined
   },
-  startShiftTime: undefined,
-  endShiftTime: undefined,
-  endBreakTime: undefined,
-  startBreakTime: undefined
+  shiftInfo: {
+    startShiftTime: undefined,
+    endShiftTime: undefined,
+  },
+  breakInfo: {
+    startBreakTime: undefined,
+    endBreakTime: undefined,
+    breakId: undefined,
+
+  }
 };
 
 export const agentReducer: Reducer<AgentState, AgentActions> = (state: AgentState = initialState, action: AgentActions): AgentState => {
-  let { agentStatus }: AgentStatus = state;
+  let { agentStatus, breakInfo, shiftInfo } = state;
   if (!agentStatus)
-    agentStatus = {};
+    agentStatus = {} as AgentStatus;
   switch (action.type) {
     case agentActionsConstants.GET_AGENT_STATUS:
-      return { ...state, agentStatus: action.payload as AgentStatus };
+      let newState = { ...state, agentStatus: action.payload as AgentStatus };
+      return newState;
     case agentActionsConstants.UPDATE_AGENT_LAST_ACTION:
-      return {
+      newState = {
         ...state,
-        agentStatus: Object.assign(agentStatus as AgentStatus, {
+        agentStatus: Object.assign({}, {
           ...agentStatus,
           lastAction: action.payload
         })
       };
+      return newState;
     case agentActionsConstants.START_SHIFT_ATTENDANCE:
-      return {
+      newState = {
         ...state,
-        startShiftTime: action.payload,
-        agentStatus: Object.assign(agentStatus as AgentStatus, {
+        shiftInfo: {
+          ...shiftInfo,
+          startShiftTime: action.payload as Date,
+        },
+        agentStatus: Object.assign({}, {
           ...agentStatus,
           checkInTime: action.payload,
           isInActiveBreak: false,
           isInActiveShift: true
         })
       };
+      return newState;
     case agentActionsConstants.END_SHIFT:
       return {};
     case agentActionsConstants.START_BREAK:
-      return {
+      newState = {
         ...state,
-        startBreakTime: action.payload,
-        agentStatus: Object.assign(agentStatus as AgentStatus, {
+        breakInfo: {
+          ...breakInfo,
+          startBreakTime: (action.payload as BreakInfo).startBreakTime,
+          breakId: (action.payload as BreakInfo).breakId,
+          endBreakTime: null
+        },
+        agentStatus: Object.assign({}, {
           ...agentStatus,
           isInActiveBreak: true,
           isInActiveShift: false
         })
       };
+      return newState;
     case agentActionsConstants.END_BREAK:
-      return {
+      newState = {
         ...state,
-        endBreakTime: action.payload,
-        agentStatus: Object.assign(agentStatus as AgentStatus, {
+        breakInfo: {
+          ...breakInfo,
+          endBreakTime: (action.payload as BreakInfo).endBreakTime,
+          breakId: (action.payload as BreakInfo).breakId,
+          startBreakTime: null
+        },
+        agentStatus: Object.assign({}, {
           ...agentStatus,
           isInActiveBreak: false,
           isInActiveShift: true
         })
       };
+      return newState;
     default:
       return state;
   }

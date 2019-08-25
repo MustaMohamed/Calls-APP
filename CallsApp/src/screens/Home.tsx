@@ -14,7 +14,7 @@ import { Button, Container, Header, Title, Body, Text, Fab, Icon, Toast } from '
 import { colorConstants } from '../constants';
 import requireAuth from '../utils/require-auth.hoc';
 import TimerProgressCircle from '../components/generic/TimerProgressCircle';
-import { AgentState, AgentStatus, AppState, AuthState } from '../types';
+import { AgentState, AgentStatus, AppState, AuthState, BreakInfo } from '../types';
 
 interface Props {
   showUiLoader: typeof showUiLoaderAction;
@@ -28,6 +28,7 @@ interface Props {
   logout: typeof logoutAction;
   auth: AuthState;
   agentStatus: AgentStatus;
+  breakInfo: BreakInfo;
 }
 
 interface State {
@@ -53,7 +54,6 @@ class HomeScreen extends Component<Props, State> {
       isShiftActive: agentStatus.isInActiveShift
     });
 
-    console.log('Home did mount !');
   }
 
   startBreak = async () => {
@@ -82,7 +82,8 @@ class HomeScreen extends Component<Props, State> {
       }), async () => {
         this.toggleFabButton();
         this.props.showUiLoader();
-        await this.props.endAgentBreak(this.props.auth.user);
+
+        await this.props.endAgentBreak(this.props.auth.user, this.props.breakInfo.breakId);
         this.props.hideUiLoader();
         Toast.show({
           text: 'Your shift has been started!',
@@ -144,8 +145,8 @@ class HomeScreen extends Component<Props, State> {
 
 const mapStateToProps = (state: ApplicationState) => {
   const { auth, agent } = state;
-  const { agentStatus } = agent;
-  return { auth, agentStatus };
+  const { agentStatus, breakInfo } = agent;
+  return { auth, agentStatus, breakInfo };
 };
 
 export default connect(mapStateToProps, {

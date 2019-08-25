@@ -1,36 +1,45 @@
 import requestFactory from '../utils/request-factory';
-import { isEmpty } from './validation.service';
-import { getFromLocalStorageAsync, removeFromLocaleStorageAsync, saveToLocalStorageAsync } from './common.service';
-import { localStorageAuthKeys } from '../constants';
+import { AuthUser, HTTPResponse, UserLogin, UserResponse } from '../types';
 
-export const userLogin: Function = async (user): Promise => {
-  const { results } = await requestFactory.get('https://randomuser.me/api/');
-  return results[0];
-};
-
-export const userLogout = async () => {
-  const { results } = await requestFactory.get('https://randomuser.me/api/');
-  return await removeAuthentication();
-};
-
-export const checkAuthentication = async () => {
-  const res = await getFromLocalStorageAsync(localStorageAuthKeys.AUTH_USER);
-  return !isEmpty(res);
-};
-
-export const getAuthentication = async () => {
-  const res = await getFromLocalStorageAsync(localStorageAuthKeys.AUTH_USER);
-  return JSON.parse(res);
-};
-
-export const saveAuthentication = async (user) => {
+export const userLogin: Function = async (user: UserLogin): Promise<AuthUser> => {
   try {
-    await saveToLocalStorageAsync(localStorageAuthKeys.AUTH_USER, JSON.stringify(user));
+    const response: HTTPResponse = await requestFactory.post('login', user, {});
+
+    const userResponse: UserResponse = response.data;
+    return {
+      id: userResponse.user.id,
+      name: userResponse.user.name,
+      username: userResponse.user.username,
+      email: userResponse.user.email,
+      branchId: userResponse.user.branch_id,
+      token: userResponse.token,
+    };
   } catch (e) {
-    console.log(e);
+    if (e.status.code >= 400 && e.status.code < 500)
+      throw new Error('Please check your username and password!');
+    else if (e.status.code >= 500) {
+      throw new Error('Internal server error!, please try again later.');
+    }
   }
 };
 
-export const removeAuthentication = async () => {
-  await removeFromLocaleStorageAsync(localStorageAuthKeys.AUTH_USER)
+export const userLogout = async (user: AuthUser, isLeave: boolean) => {
+  try {
+
+    if (user) {
+      await requestFactory.get('logout', { is_leave: isLeave }, {
+        Authorization: `Bearer ${user.token}`
+      });
+    }
+  } catch (e) {
+    if (e.status.code >= 400 && e.status.code < 500)
+      throw new Error('User unauthenticated!, Please login again.');
+    else if (e.status.code >= 500) {
+      throw new Error('Internal server error!, please try again later.');
+    } else {
+
+    }
+  } finally {
+  }
 };
+
