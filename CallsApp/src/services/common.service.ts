@@ -1,26 +1,27 @@
 import AsyncStorage from '@react-native-community/async-storage';
 
 
-export const saveToLocalStorageAsync = async (key: string, value: string) => {
+export const saveToLocalStorageAsync = async (key: string, value: any): Promise<any> => {
   try {
-    await AsyncStorage.setItem(key, value);
+    await AsyncStorage.setItem(key, JSON.stringify(value));
+    return result = await getFromLocalStorageAsync(key);
   } catch (e) {
     // saving error
   }
 };
 
-export const getFromLocalStorageAsync = async (key: string) => {
+export const getFromLocalStorageAsync = async (key: string): Promise<any> => {
   try {
-    return await AsyncStorage.getItem(key);
+    return JSON.parse(await AsyncStorage.getItem(key));
   } catch (e) {
     // error reading value
-    return null;
+
   }
 };
 
-export const removeFromLocaleStorageAsync = async (key: string) => {
+export const removeFromLocaleStorageAsync = async (key: string): Promise<any> => {
   try {
-    await AsyncStorage.removeItem(key);
+    return await AsyncStorage.removeItem(key);
   } catch (e) {
     // error reading value
   }

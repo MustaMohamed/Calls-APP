@@ -1,6 +1,6 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
-import { appReducer, authReducer } from '../reducers';
+import { agentReducer, appReducer, authReducer } from '../reducers';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import { persistStore, persistReducer } from 'redux-persist'
 import AsyncStorage from '@react-native-community/async-storage';
@@ -9,7 +9,8 @@ import AsyncStorage from '@react-native-community/async-storage';
 // application reducers
 const rootReducer = combineReducers({
   app: appReducer,
-  auth: authReducer
+  auth: authReducer,
+  agent: agentReducer
 });
 
 // middle wares

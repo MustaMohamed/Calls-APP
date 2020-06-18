@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { AppContainer } from './navigations';
 import { Root, StyleProvider } from 'native-base';
 import theme from '../native-base-theme/variables/material';
@@ -6,42 +6,57 @@ import getTheme from '../native-base-theme/components';
 import { connect } from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { ApplicationState } from './redux-store/store';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, AppState } from 'react-native';
 import { colorConstants } from './constants';
-import { hideUiLoader } from './redux-store/actions';
+import { hideUiLoaderAction, changeAppIsInBackgroundState } from './redux-store/actions';
 
 interface Props {
   uiLoaderIsActive: boolean;
-  hideUiLoader: typeof hideUiLoader
+  hideUiLoader: typeof hideUiLoaderAction;
+  changeAppIsInBackgroundState: typeof changeAppIsInBackgroundState;
 }
 
 interface State {
   spinnerActive: boolean;
 }
 
-class Startup extends Component<Props, State> {
+class Startup extends PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      spinnerActive: false
+      spinnerActive: false,
+      appState: AppState.currentState,
     };
     this.tm = [];
   }
 
   componentDidMount(): void {
-    this.setState({ spinnerActive: this.props.uiLoaderIsActive });
+    // this.setState({ spinnerActive: this.props.uiLoaderIsActive });
+    console.log('Application Did Mount !');
+    AppState.addEventListener('change', this._handleAppStateChange);
   }
 
   componentWillUnmount(): void {
     this.tm.map(tmNumber => clearTimeout(tmNumber));
     this.props.hideUiLoader();
+    console.log('Application will UnMount !');
+    AppState.removeEventListener('change', this._handleAppStateChange);
   }
 
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
     if (this.props.uiLoaderIsActive !== this.state.spinnerActive) {
-      this.tm.push(setTimeout(() => this.setState(state => ({ spinnerActive: !state.spinnerActive })), 50));
+      this.tm.push(setTimeout(() => this.setState(state => ({ spinnerActive: !state.spinnerActive }))), 20);
     }
   }
+
+  _handleAppStateChange = (nextAppState) => {
+    const appIsInBackgroundState = !(this.state.appState.match(/inactive|background/) && nextAppState === 'active');
+    this.setState({ appState: nextAppState });
+    this.props.changeAppIsInBackgroundState(appIsInBackgroundState);
+    if (appIsInBackgroundState)
+      this.props.hideUiLoader();
+  };
+
 
   render() {
     return (
@@ -64,7 +79,10 @@ const mapStateToProps = (state: ApplicationState) => {
   return app;
 };
 
-export default connect(mapStateToProps, { hideUiLoader })(Startup);
+export default connect(mapStateToProps, {
+  hideUiLoader: hideUiLoaderAction,
+  changeAppIsInBackgroundState: changeAppIsInBackgroundState
+})(Startup);
 
 const styles = StyleSheet.create({
   spinnerTextStyle: {

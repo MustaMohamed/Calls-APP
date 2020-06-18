@@ -1,7 +1,7 @@
 import { validationConstants } from '../constants';
 
 export const isEmpty = (data: any): boolean => {
-  return data === undefined || data === null || data === {} || data === [] || data === '' || data === "" || data === 0;
+  return data === undefined || data === null || (Object.keys(data).length === 0 && data.constructor === Object)|| data == [] || data === '' || data === "" || data === 0 || false;
 };
 
 export const isValidEmail = (email: string): boolean => {
